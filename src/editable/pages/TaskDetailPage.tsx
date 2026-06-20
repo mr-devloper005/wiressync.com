@@ -134,36 +134,38 @@ function BackLink({ task }: { task: TaskKey }) {
 
 function ArticleDetail({ task, post, related, comments }: { task: TaskKey; post: SitePost; related: SitePost[]; comments: Array<{ id: string; name: string; comment: string; createdAt: string }> }) {
   const images = getImages(post)
-  const published = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''
   return (
-    <section className="bg-[#f7f4ef]">
-      <header className="border-b border-black/20">
-        <div className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <section className="editable-page-enter bg-[#f4f4f4]">
+      <div className="editable-reading-progress" />
+      <div className="mx-auto grid max-w-[1068px] gap-14 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,704px)_310px]">
+        <div>
           <BackLink task={task} />
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t-4 border-black pt-4 text-[11px] font-black uppercase tracking-[0.16em]">
-            <span className="text-[#c92f2f]">{categoryOf(post, 'News')}</span>
-            {published ? <time>{published}</time> : null}
-          </div>
-          <h1 className="editorial-serif mt-6 max-w-6xl text-5xl font-black leading-[0.94] tracking-[-0.055em] sm:text-6xl lg:text-[5.5rem]">{post.title}</h1>
-          {summaryText(post) ? <p className="mt-6 max-w-4xl text-xl font-bold leading-8 text-black/68 sm:text-2xl">{summaryText(post)}</p> : null}
+          <article className="mt-8 grid gap-5 border-b border-black/12 pb-12 sm:grid-cols-[132px_1fr]">
+            <div className="border-black/12 text-left text-sm leading-6 text-black/58 sm:border-r sm:pr-6 sm:text-right">
+              <p>in <span className="font-semibold text-[#2f80ed]">{categoryOf(post, 'News')}</span></p>
+              <p>by <span className="font-semibold text-[#2f80ed]">{SITE_CONFIG.name}</span></p>
+            </div>
+            <div className="min-w-0">
+              <h1 className="max-w-[680px] text-4xl font-black leading-[1.03] tracking-[-0.04em] text-[#111] sm:text-5xl">{post.title}</h1>
+              {images[0] ? (
+                <figure className="mt-8 bg-white">
+                  <img src={images[0]} alt="" className="w-full object-cover" />
+                </figure>
+              ) : null}
+              <div className="mt-8">
+                <BodyContent post={post} />
+              </div>
+              <EditableComments slug={post.slug} comments={comments} />
+            </div>
+          </article>
         </div>
-      </header>
-
-      {images[0] ? (
-        <figure className="mx-auto max-w-[1320px] border-x border-b border-black/15 bg-white">
-          <img src={images[0]} alt="" className="max-h-[760px] w-full object-cover" />
-          <figcaption className="border-t border-black/15 px-4 py-3 text-xs italic text-black/55 sm:px-6">Featured image for {post.title}</figcaption>
-        </figure>
-      ) : null}
-
-      <div className="mx-auto grid max-w-[1180px] gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,760px)_300px] lg:px-8 lg:py-16">
-        <article className="min-w-0 border-t-4 border-black pt-8">
-          <BodyContent post={post} />
-          <EditableComments slug={post.slug} comments={comments} />
-        </article>
-        <div className="border-t-4 border-[#c92f2f] pt-5">
-          <RelatedPanel task={task} post={post} related={related} />
-        </div>
+        <aside className="space-y-10 lg:sticky lg:top-36 lg:self-start">
+          <section>
+            <h2 className="text-4xl font-black tracking-[-0.04em]">About Us</h2>
+            <p className="mt-6 text-base leading-7 text-black/68">{SITE_CONFIG.name} publishes media distribution updates, public relations notes, and release-ready posts in a readable newswire format.</p>
+          </section>
+          <RelatedPanel task={task} post={post} related={related} compact />
+        </aside>
       </div>
     </section>
   )
@@ -405,7 +407,6 @@ function RelatedPanel({ task, post, related, compact = false }: { task: TaskKey;
           <div className="mt-4 grid gap-3 text-sm font-bold opacity-75">
             <p className="inline-flex items-center gap-2"><Tag className="h-4 w-4" /> Task: {taskConfig?.label || task}</p>
             <p className="inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Site: {SITE_CONFIG.name}</p>
-            {post.publishedAt ? <p>Published: {new Date(post.publishedAt).toLocaleDateString()}</p> : null}
           </div>
         </div>
       ) : null}
@@ -427,7 +428,7 @@ function RelatedPanel({ task, post, related, compact = false }: { task: TaskKey;
 function RelatedCard({ task, post }: { task: TaskKey; post: SitePost }) {
   const image = getImages(post)[0]
   return (
-    <Link href={buildPostUrl(task, post.slug)} className="group flex gap-3 border-t border-black/15 py-3 transition hover:text-[#c92f2f]">
+    <Link href={buildPostUrl(task, post.slug)} className="group flex gap-3 border-t border-black/15 py-3 transition hover:text-[#2f80ed]">
       {image && task !== 'sbm' ? <img src={image} alt="" className="h-20 w-20 shrink-0 object-cover" /> : <div className="flex h-20 w-20 shrink-0 items-center justify-center bg-black text-white"><FileText className="h-6 w-6" /></div>}
       <div className="min-w-0">
         <h3 className="line-clamp-3 text-sm font-black leading-tight tracking-[-0.03em]">{post.title}</h3>
