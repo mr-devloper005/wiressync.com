@@ -4,7 +4,6 @@ import { ArrowRight, Filter, Search } from 'lucide-react'
 import { buildPageMetadata } from '@/lib/seo'
 import { fetchSiteFeed } from '@/lib/site-connector'
 import { buildPostUrl, getPostTaskKey } from '@/lib/task-data'
-import { getMockPostsForTask } from '@/lib/mock-posts'
 import { SITE_CONFIG, type TaskKey } from '@/lib/site-config'
 import type { SitePost } from '@/lib/site-connector'
 import { EditableSiteShell } from '@/editable/shell/EditableSiteShell'
@@ -60,11 +59,11 @@ function SearchResultCard({ post, index }: { post: SitePost; index: number }) {
         <div className={`relative overflow-hidden bg-black ${strong ? 'aspect-[16/7]' : 'aspect-[16/10]'}`}>
           <img src={image} alt="" className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-          <span className="absolute left-4 top-4 bg-[#c92f2f] px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">{taskLabel}</span>
+          <span className="absolute left-4 top-4 bg-[#2f80ed] px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">{taskLabel}</span>
         </div>
       ) : null}
       <div className="p-5 sm:p-6">
-        {!image ? <span className="bg-[#c92f2f] px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">{taskLabel}</span> : null}
+        {!image ? <span className="bg-[#2f80ed] px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">{taskLabel}</span> : null}
         <h2 className="editorial-serif mt-4 line-clamp-3 text-2xl font-black leading-[1.03] tracking-[-0.035em] text-black">{post.title}</h2>
         {summary ? <p className="mt-4 line-clamp-3 text-sm font-semibold leading-7 text-[var(--editable-page-text,#211713)]/65">{summary}</p> : null}
         <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] opacity-60 group-hover:opacity-100">Open result <ArrowRight className="h-4 w-4" /></span>
@@ -81,17 +80,18 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
   const task = (resolved.task || '').trim().toLowerCase()
   const useMaster = resolved.master !== '0'
   const feed = await fetchSiteFeed(useMaster ? 1000 : 300, useMaster ? { fresh: true, category: category || undefined, task: task || undefined } : undefined)
-  const posts = feed?.posts?.length ? feed.posts : useMaster ? [] : SITE_CONFIG.tasks.filter((item) => item.enabled).flatMap((item) => getMockPostsForTask(item.key))
+  const posts = feed?.posts || []
   const results = posts.filter((post) => matches(post, normalized, category, task)).slice(0, normalized ? 80 : 36)
   const enabledTasks = SITE_CONFIG.tasks.filter((item) => item.enabled)
+  const mediaRoute = SITE_CONFIG.taskViews.mediaDistribution || '/media-distribution'
 
   return (
     <EditableSiteShell>
-      <main className="min-h-screen bg-[#f7f4ef] text-black">
+      <main className="editable-page-enter min-h-screen bg-[#f7f4ef] text-black">
         <section className="mx-auto max-w-[var(--editable-container)] border-x border-black bg-[#f7f4ef]">
           <div className="grid border-b border-black bg-white md:grid-cols-[0.8fr_1.2fr]">
             <div>
-              <div className="h-full bg-[#c92f2f] p-7 text-white sm:p-10 lg:p-14">
+              <div className="h-full bg-[#2f80ed] p-7 text-white sm:p-10 lg:p-14">
                 <p className="text-xs font-black uppercase tracking-[0.28em]">{pagesContent.search.hero.badge}</p>
                 <h1 className="editorial-brand mt-5 text-6xl font-black leading-[0.9] tracking-[-0.055em] sm:text-8xl">{pagesContent.search.hero.title}</h1>
                 <p className="mt-6 max-w-xl text-base font-semibold leading-8 text-white/75">{pagesContent.search.hero.description}</p>
@@ -113,16 +113,16 @@ export default async function SearchPage({ searchParams }: { searchParams?: Prom
                   {enabledTasks.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
                 </select>
               </div>
-              <button className="mt-3 inline-flex h-12 w-full items-center justify-center border border-black bg-black px-6 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-[#c92f2f]" type="submit">Search</button>
+              <button className="mt-3 inline-flex h-12 w-full items-center justify-center border border-black bg-black px-6 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-[#2f80ed]" type="submit">Search</button>
             </form>
           </div>
 
           <div className="flex flex-wrap items-end justify-between gap-4 border-b-4 border-black px-4 py-8 sm:px-6 lg:px-8">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] opacity-50">{results.length} results</p>
-              <h2 className="editorial-brand mt-2 text-4xl font-black tracking-[-0.04em]">{query ? `Results for “${query}”` : pagesContent.search.resultsTitle}</h2>
+              <h2 className="mt-2 text-4xl font-black tracking-[-0.04em]">{query ? `Results for "${query}"` : pagesContent.search.resultsTitle}</h2>
             </div>
-            <Link href="/article" className="inline-flex items-center gap-2 border border-black bg-white px-5 py-3 text-xs font-black uppercase">Browse latest <ArrowRight className="h-4 w-4" /></Link>
+            <Link href={mediaRoute} className="inline-flex items-center gap-2 border border-black bg-white px-5 py-3 text-xs font-black uppercase">Browse latest <ArrowRight className="h-4 w-4" /></Link>
           </div>
 
           {results.length ? (
